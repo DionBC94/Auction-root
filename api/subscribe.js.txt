@@ -1,14 +1,50 @@
-// api/subscribe.js
-module.exports = async (req, res) => {
-  if (req.method === 'POST') {
-    const { fortnightId, email } = req.body;
+const express = require('express');
+const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
+dotenv.config(); // to load environment variables from the .env file
 
-    // Simulate storing the subscription data (could integrate with a DB in the future)
-    const fortnight = { id: fortnightId, email: email };
+const app = express();
+app.use(express.json()); // for parsing application/json
 
-    // Respond with success
-    return res.status(200).json({ message: 'Subscribed successfully', fortnight });
-  } else {
-    res.status(405).send('Method Not Allowed');
+// Email Transport Configuration using ProtonMail Bridge
+const transporter = nodemailer.createTransport({
+  service: 'ProtonMail',
+  host: process.env.SMTP_HOST,   // Your SMTP host from ProtonMail Bridge
+  port: process.env.SMTP_PORT,   // Your SMTP port (usually 465 for SSL)
+  secure: true,                  // true for 465, false for other ports
+  auth: {
+    user: process.env.EMAIL_USER,  // Your ProtonMail email address
+    pass: process.env.EMAIL_PASS,  // The password provided by ProtonMail Bridge
+  },
+});
+
+// Endpoint to receive form submission and send email
+app.post('/api/subscribe', (req, res) => {
+  const { email } = req.body;
+
+  // Validate email format (basic check)
+  if (!email || !email.includes('@')) {
+    return res.status(400).send('Invalid email address');
   }
-};
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Pledge Notification',
+    text: 'You will be notified if a pledge secures this fortnight.',
+  };
+
+  // Send email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error);
+      return res.status(500).send('Error sending email.');
+    }
+    console.log('Email sent: ' + info.response);
+    return res.status(200).send('Email sent successfully!');
+  });
+});
+
+// Run the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
