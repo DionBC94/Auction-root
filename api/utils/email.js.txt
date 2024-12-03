@@ -1,19 +1,23 @@
+require('dotenv').config();  // Ensure you load the .env variables
+
 const nodemailer = require('nodemailer');
 
 const sendEmail = async (email, fortnight) => {
+  // Create the transport for Nodemailer using details from .env
   const transporter = nodemailer.createTransport({
-    host: '127.0.0.1',       // ProtonMail Bridge SMTP server
-    port: 1025,              // ProtonMail Bridge SMTP port
-    secure: false,           // No SSL/TLS (ProtonMail Bridge handles encryption)
+    host: process.env.SMTP_HOST,       // Use SMTP_HOST from .env
+    port: process.env.SMTP_PORT,       // Use SMTP_PORT from .env
+    secure: false,                     // No SSL/TLS (ProtonMail Bridge handles encryption)
     auth: {
-      user: process.env.EMAIL_USER,  // Your ProtonMail email
-      pass: process.env.EMAIL_PASS,  // Your ProtonMail Bridge app password
+      user: process.env.EMAIL_USER,    // Use EMAIL_USER from .env
+      pass: process.env.EMAIL_PASS,    // Use EMAIL_PASS from .env
     },
   });
 
+  // Define the email content and recipient
   const mailOptions = {
-    from: process.env.EMAIL_USER,  // Sender's email
-    to: email,                     // Recipient's email
+    from: process.env.EMAIL_USER,      // Sender's email
+    to: email,                         // Recipient's email
     subject: `Fortnight ${fortnight.id} Update`,
     text: `Your pledge has been usurped. New details:
 Name: ${fortnight.name}
@@ -23,11 +27,11 @@ Highest Pledge: EUR ${fortnight.highestPledge}`,
   // Send email using Nodemailer
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.log(error);
+      console.log(error);  // If there's an error, log it
     } else {
-      console.log('Email sent: ' + info.response);
+      console.log('Email sent: ' + info.response);  // If successful, log the response
     }
   });
 };
 
-module.exports = { sendEmail };
+module.exports = { sendEmail };  // Export sendEmail function for other files to use
