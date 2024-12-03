@@ -1,0 +1,33 @@
+const nodemailer = require('nodemailer');
+
+const sendEmail = async (email, fortnight) => {
+  const transporter = nodemailer.createTransport({
+    host: '127.0.0.1',       // ProtonMail Bridge SMTP server
+    port: 1025,              // ProtonMail Bridge SMTP port
+    secure: false,           // No SSL/TLS (ProtonMail Bridge handles encryption)
+    auth: {
+      user: process.env.EMAIL_USER,  // Your ProtonMail email
+      pass: process.env.EMAIL_PASS,  // Your ProtonMail Bridge app password
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,  // Sender's email
+    to: email,                     // Recipient's email
+    subject: `Fortnight ${fortnight.id} Update`,
+    text: `Your pledge has been usurped. New details:
+Name: ${fortnight.name}
+Highest Pledge: EUR ${fortnight.highestPledge}`,
+  };
+
+  // Send email using Nodemailer
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+};
+
+module.exports = { sendEmail };

@@ -1,0 +1,14 @@
+// api/subscribe.js
+module.exports = async (req, res) => {
+  if (req.method === 'POST') {
+    const { fortnightId, email } = req.body;
+
+    // Simulate storing the subscription data (could integrate with a DB in the future)
+    const fortnight = { id: fortnightId, email: email };
+
+    // Respond with success
+    return res.status(200).json({ message: 'Subscribed successfully', fortnight });
+  } else {
+    res.status(405).send('Method Not Allowed');
+  }
+};
