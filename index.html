@@ -54,8 +54,7 @@
     <h1>Share time with Dion: Auction 2025</h1>
     <div id="fortnights"></div>
 
-    <!-- Secure-Free Modal -->
-    
+  <!-- Secure-Free Modal -->
 <div id="secure-free-modal" class="hidden modal">
     <h2>Secure Fortnight</h2>
     <form id="free-form">
@@ -70,20 +69,20 @@
 
 
     <!-- Pledge Modal -->
-    <div id="pledge-modal" class="hidden modal">
-        <h2>Pledge to Secure Fortnight</h2>
-        <form id="pledge-form">
-            <label for="pledge-name">Your Name:</label>
-            <input type="text" id="pledge-name" required><br>
-            <label for="pledge-amount">Your Pledge (EUR):</label>
-            <input type="number" id="pledge-amount" min="0" step="0.01" required><br><br>
-            <p id="pledge-warning" class="hidden">Pledge must be higher than the current highest! - <span id="current-highest"></span></p>
-            <button type="submit">Submit</button>
-            <button type="button" onclick="closeModal('pledge-modal')">Cancel</button>
-        </form>
-    </div>
+<div id="pledge-modal" class="hidden modal">
+    <h2>Pledge to Secure Fortnight</h2>
+    <form id="pledge-form">
+        <label for="pledge-name">Your Name:</label>
+        <input type="text" id="pledge-name" required><br>
+        <label for="pledge-amount">Your Pledge (EUR):</label>
+        <input type="number" id="pledge-amount" min="0" step="0.01" required><br><br>
+        <p id="pledge-warning" class="hidden">Pledge must be higher than the current highest! - <span id="current-highest"></span></p>
+        <button type="submit">Submit</button>
+        <button type="button" onclick="closeModal('pledge-modal')">Cancel</button>
+    </form>
+</div>
 
-    <script>
+<script>
         const fortnights = [
             "1st of January - 14th of January",
             "15th of January - 28th of January",
@@ -155,39 +154,69 @@
             currentFortnightId = null;
         }
 
-        
+       // Handle 'Secure - Free' form submission
+    document.getElementById("free-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("free-name").value;
+        const email = document.getElementById("notify-email").value;
+        const fortnight = fortnights.find(f => f.id === currentFortnightId);
 
-document.getElementById("free-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const name = document.getElementById("free-name").value;
-    const email = document.getElementById("notify-email").value;
-    const fortnight = fortnights.find(f => f.id === currentFortnightId);
+        if (fortnight.status !== "Secured") {
+            fortnight.status = "Secured - Free";
+            fortnight.name = name;
+            if (email) {
+                fortnight.email = email; // Capture the email if provided
+            }
+            closeModal("secure-free-modal");
+            renderFortnights();
 
-    if (fortnight.status !== "Secured") {
-        fortnight.status = "Secured - Free";
-        fortnight.name = name;
-        if (email) {
-            fortnight.email = email; // Capture the email if provided
+            // Send API request to /apisubscribe
+            fetch('/apisubscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email })
+            })
+            .then(response => response.json())
+            .then(data => console.log('Subscription email sent successfully:', data))
+            .catch(error => console.error('Error sending subscription email:', error));
         }
-        closeModal("secure-free-modal");
-        renderFortnights(); // Re-render the UI
-    }
-});
+    });
 
+     // Handle 'Pledge' form submission
+    document.getElementById("pledge-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("pledge-name").value;
+        const pledge = parseFloat(document.getElementById("pledge-amount").value);
+        const fortnight = fortnights.find(f => f.id === currentFortnightId);
 
+        if (pledge > fortnight.highestPledge) {
+            fortnight.highestPledge = pledge;
+            fortnight.status = "Secured";
+            fortnight.name = name;
+            closeModal("pledge-modal");
+            renderFortnights();
 
-        document.getElementById("pledge-form").addEventListener("submit", (e) => {
-            e.preventDefault();
-            const name = document.getElementById("pledge-name").value;
-            const pledge = parseFloat(document.getElementById("pledge-amount").value);
-            const fortnight = fortnights.find(f => f.id === currentFortnightId);
+            // Send API request to /apiupdate-pledge
+            fetch('/apiupdate-pledge', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ fortnightId: currentFortnightId, name: name, pledge: pledge })
+            })
+            .then(response => response.json())
+            .then(data => console.log('Pledge update email sent successfully:', data))
+            .catch(error => console.error('Error sending pledge update email:', error));
+        } else {
+            document.getElementById("current-highest").innerText = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(fortnight.highestPledge);
+            document.getElementById("pledge-warning").classList.remove("hidden");
+        }
+    });
 
-            if (pledge > fortnight.highestPledge) {
-                fortnight.highestPledge = pledge;
-                fortnight.status = "Secured";
-                fortnight.name = name;
-                closeModal("pledge-modal");
-                renderFortnights();
+    document.addEventListener("DOMContentLoaded", renderFortnights);
+</script>
 
                 // Trigger opt-in modal 1.25 seconds after successful pledge
                 setTimeout(() => {
