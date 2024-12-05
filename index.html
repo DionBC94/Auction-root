@@ -218,7 +218,7 @@
     document.addEventListener("DOMContentLoaded", renderFortnights);
 </script>
 
-               // Trigger opt-in modal 1.25 seconds after successful pledge
+             // Trigger opt-in modal 1.25 seconds after successful pledge
 setTimeout(() => {
     const optInModal = document.createElement('div');
     optInModal.id = "opt-in-modal";
@@ -246,6 +246,7 @@ setTimeout(() => {
         optInModal.remove(); // Close the modal without confirming
     });
 }, 1250); // 1.25 seconds delay
+
 
     <!-- Opt-In Modal -->
     <div id="opt-in-modal" class="hidden modal">
