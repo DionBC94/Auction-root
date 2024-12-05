@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,19 +54,17 @@
     <div id="fortnights"></div>
 
     <!-- Secure-Free Modal -->
-    
-<div id="secure-free-modal" class="hidden modal">
-    <h2>Secure Fortnight</h2>
-    <form id="free-form">
-        <label for="free-name">Your Name:</label>
-        <input type="text" id="free-name" required><br><br>
-        <label for="notify-email">Notify me if a pledge instead secures this fortnight:</label>
-        <input type="email" id="notify-email" placeholder="Enter your email"><br><br>
-        <button type="submit">Submit</button>
-        <button type="button" onclick="closeModal('secure-free-modal')">Cancel</button>
-    </form>
-</div>
-
+    <div id="secure-free-modal" class="hidden modal">
+        <h2>Secure Fortnight</h2>
+        <form id="free-form">
+            <label for="free-name">Your Name:</label>
+            <input type="text" id="free-name" required><br><br>
+            <label for="notify-email">Notify me if a pledge secures this fortnight:</label>
+            <input type="email" id="notify-email" placeholder="Enter your email"><br><br>
+            <button type="submit">Submit</button>
+            <button type="button" onclick="closeModal('secure-free-modal')">Cancel</button>
+        </form>
+    </div>
 
     <!-- Pledge Modal -->
     <div id="pledge-modal" class="hidden modal">
@@ -82,6 +79,139 @@
             <button type="button" onclick="closeModal('pledge-modal')">Cancel</button>
         </form>
     </div>
+
+<script>
+    // Array of fortnights with detailed start and end dates
+    const fortnights = [
+        { id: 1, dates: "1st of January - 14th of January", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 2, dates: "15th of January - 28th of January", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 3, dates: "29th of January - 11th of February", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 4, dates: "12th of February - 25th of February", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 5, dates: "26th of February - 11th of March", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 6, dates: "12th of March - 25th of March", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 7, dates: "26th of March - 8th of April", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 8, dates: "9th of April - 22nd of April", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 9, dates: "23rd of April - 6th of May", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 10, dates: "7th of May - 20th of May", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 11, dates: "21st of May - 3rd of June", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 12, dates: "4th of June - 17th of June", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 13, dates: "18th of June - 1st of July", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 14, dates: "2nd of July - 15th of July", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 15, dates: "16th of July - 29th of July", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 16, dates: "30th of July - 12th of August", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 17, dates: "13th of August - 26th of August", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 18, dates: "27th of August - 9th of September", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 19, dates: "10th of September - 23rd of September", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 20, dates: "24th of September - 7th of October", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 21, dates: "8th of October - 21st of October", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 22, dates: "22nd of October - 4th of November", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 23, dates: "5th of November - 18th of November", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 24, dates: "19th of November - 2nd of December", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 25, dates: "3rd of December - 16th of December", status: "Unsecured", name: null, highestPledge: 0 },
+        { id: 26, dates: "17th of December - 30th of December", status: "Unsecured", name: null, highestPledge: 0 },
+    ];
+
+    let currentFortnightId = null;
+
+    function renderFortnights() {
+        const container = document.getElementById("fortnights");
+        container.innerHTML = "";
+        fortnights.forEach(({ id, dates, status, name }) => {
+            const div = document.createElement("div");
+            div.className = "fortnight-segment";
+            div.innerHTML = `
+                <h3>Fortnight ${id}: ${dates}</h3>
+                <p>Status: ${status}${name ? ` (Secured by: ${name})` : ""}</p>
+                <button onclick="openFreeModal(${id})" ${status !== "Unsecured" ? "disabled" : ""}>Secure - Free</button>
+                <button onclick="openPledgeModal(${id})">Secure for ...</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function openFreeModal(id) {
+        currentFortnightId = id;
+        document.getElementById("secure-free-modal").classList.remove("hidden");
+    }
+
+    function openPledgeModal(id) {
+        currentFortnightId = id;
+        const fortnight = fortnights.find(f => f.id === currentFortnightId);
+        document.getElementById("current-highest").innerText = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(fortnight.highestPledge);
+        document.getElementById("pledge-modal").classList.remove("hidden");
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add("hidden");
+        currentFortnightId = null;
+    }
+
+    // Handle 'Secure - Free' form submission
+    document.getElementById("free-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("free-name").value;
+        const email = document.getElementById("notify-email").value;
+        const fortnight = fortnights.find(f => f.id === currentFortnightId);
+
+        if (fortnight.status !== "Secured") {
+            fortnight.status = "Secured - Free";
+            fortnight.name = name;
+            if (email) {
+                fortnight.email = email; // Capture the email if provided
+            }
+            closeModal("secure-free-modal");
+            renderFortnights();
+
+            // Send API request to /apisubscribe
+            fetch('/apisubscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email })
+            })
+            .then(response => response.json())
+            .then(data => console.log('Subscription email sent successfully:', data))
+            .catch(error => console.error('Error sending subscription email:', error));
+        }
+    });
+
+    // Handle 'Pledge' form submission
+    document.getElementById("pledge-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("pledge-name").value;
+        const pledge = parseFloat(document.getElementById("pledge-amount").value);
+        const fortnight = fortnights.find(f => f.id === currentFortnightId);
+
+        if (pledge > fortnight.highestPledge) {
+            fortnight.highestPledge = pledge;
+            fortnight.status = "Secured";
+            fortnight.name = name;
+            closeModal("pledge-modal");
+            renderFortnights();
+
+            // Send API request to /apiupdate-pledge
+            fetch('/apiupdate-pledge', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ fortnightId: currentFortnightId, name: name, pledge: pledge })
+            })
+            .then(response => response.json())
+            .then(data => console.log('Pledge update email sent successfully:', data))
+            .catch(error => console.error('Error sending pledge update email:', error));
+        } else {
+            document.getElementById("current-highest").innerText = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(fortnight.highestPledge);
+            document.getElementById("pledge-warning").classList.remove("hidden");
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", renderFortnights);
+</script>
+</body>
+</html>
+
 
     <script>
         const fortnights = [
