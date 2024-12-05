@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Endpoint to receive form submission and send email
-app.post('/api/subscribe', (req, res) => {
+app.post('/apisubscribe', (req, res) => {
   const { email } = req.body;
 
   // Validate email format (basic check)
