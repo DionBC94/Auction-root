@@ -218,38 +218,34 @@
     document.addEventListener("DOMContentLoaded", renderFortnights);
 </script>
 
-                // Trigger opt-in modal 1.25 seconds after successful pledge
-                setTimeout(() => {
-                    const optInModal = document.createElement('div');
-                    optInModal.id = "opt-in-modal";
-                    optInModal.className = "modal";
-                    optInModal.innerHTML = `
-                        <h2>Would you like to be notified if your pledge is usurped?</h2>
-                        <label for="opt-in-email">Email:</label>
-                        <input type="email" id="opt-in-email" placeholder="Enter your email" required><br><br>
-                        <button id="opt-in-yes">Yes, Notify Me</button>
-                        <button id="opt-in-no">No, Thank You</button>
-                    `;
-                    document.body.appendChild(optInModal);
+               // Trigger opt-in modal 1.25 seconds after successful pledge
+setTimeout(() => {
+    const optInModal = document.createElement('div');
+    optInModal.id = "opt-in-modal";
+    optInModal.className = "modal"; // Ensure the modal class is correctly set
+    optInModal.innerHTML = `
+        <h2>Would you like to be notified if your pledge is usurped?</h2>
+        <label for="opt-in-email">Email:</label>
+        <input type="email" id="opt-in-email" placeholder="Enter your email" required><br><br>
+        <button id="opt-in-yes">Yes, Notify Me</button>
+        <button id="opt-in-no">No, Thank You</button>
+    `;
+    // Log to ensure modal is created
+    console.log('Opt-in modal created:', optInModal);
+    document.body.appendChild(optInModal);
 
-                    document.getElementById("opt-in-yes").addEventListener("click", () => {
-                        const email = document.getElementById("opt-in-email").value;
-                        alert('Will do!');
-                        optInModal.remove();
-                    });
+    // Handle Yes button
+    document.getElementById("opt-in-yes").addEventListener("click", () => {
+        const email = document.getElementById("opt-in-email").value;
+        alert('Will do!');
+        optInModal.remove(); // Close the modal after confirming
+    });
 
-                    document.getElementById("opt-in-no").addEventListener("click", () => {
-                        optInModal.remove();
-                    });
-                }, 1250); // 1.25 seconds delay
-            } else {
-                document.getElementById("current-highest").innerText = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(fortnight.highestPledge);
-                document.getElementById("pledge-warning").classList.remove("hidden");
-            }
-        });
-
-        document.addEventListener("DOMContentLoaded", renderFortnights);
-    </script>
+    // Handle No button
+    document.getElementById("opt-in-no").addEventListener("click", () => {
+        optInModal.remove(); // Close the modal without confirming
+    });
+}, 1250); // 1.25 seconds delay
 
     <!-- Opt-In Modal -->
     <div id="opt-in-modal" class="hidden modal">
