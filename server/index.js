@@ -2,10 +2,14 @@ const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
 const nodemailer = require('nodemailer');
+const cors = require('cors');  // Add this line to import cors
 
 dotenv.config(); // Load environment variables
 
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors());  // This line allows cross-origin requests
 
 // Middleware to parse JSON bodies
 app.use(express.json());
@@ -22,9 +26,6 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,  // From .env file
     pass: process.env.EMAIL_PASS,  // From .env file
   },
-  tls: {
-    rejectUnauthorized: false,  // Allow self-signed certificates (important for ProtonMail Bridge)
-  }
 });
 
 // Example API route for subscribing (handles POST requests)
