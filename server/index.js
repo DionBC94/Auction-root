@@ -51,10 +51,10 @@ app.post('/apisubscribe', (req, res) => {
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.log(error);
-      return res.status(500).json('Error sending email');
+      return res.status(500).json({ error: 'Error sending email' });
     }
     console.log('Email sent: ' + info.response);
-    return res.status(200).json('Email sent successfully');
+    return res.status(200).json({ message: 'Email sent successfully' });
   });
 });
 
