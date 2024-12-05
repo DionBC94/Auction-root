@@ -53,19 +53,6 @@
     <h1>Share time with Dion: Auction 2025</h1>
     <div id="fortnights"></div>
 
-    <!-- Secure-Free Modal -->
-    <div id="secure-free-modal" class="hidden modal">
-        <h2>Secure Fortnight</h2>
-        <form id="free-form">
-            <label for="free-name">Your Name:</label>
-            <input type="text" id="free-name" required><br><br>
-            <label for="notify-email">Notify me if a pledge instead secures this fortnight:</label>
-            <input type="email" id="notify-email" placeholder="Enter your email"><br><br>
-            <button type="submit">Submit</button>
-            <button type="button" onclick="closeModal('secure-free-modal')">Cancel</button>
-        </form>
-    </div>
-
     <!-- Pledge Modal -->
     <div id="pledge-modal" class="hidden modal">
         <h2>Pledge to Secure Fortnight</h2>
@@ -127,16 +114,10 @@
                 div.innerHTML = `
                     <h3>Fortnight ${id}: ${dates}</h3>
                     <p>Status: ${status}${name ? ` (Secured by: ${name})` : ""}</p>
-                    <button onclick="openFreeModal(${id})" ${status !== "Unsecured" ? "disabled" : ""}>Secure - Free</button>
                     <button onclick="openPledgeModal(${id})">Secure for ...</button>
                 `;
                 container.appendChild(div);
             });
-        }
-
-        function openFreeModal(id) {
-            currentFortnightId = id;
-            document.getElementById("secure-free-modal").classList.remove("hidden");
         }
 
         function openPledgeModal(id) {
@@ -151,34 +132,6 @@
             currentFortnightId = null;
         }
 
-        // Secure-Free Modal: Submit email for subscription
-        document.getElementById("free-form").addEventListener("submit", (e) => {
-            e.preventDefault();
-            const name = document.getElementById("free-name").value;
-            const email = document.getElementById("notify-email").value;
-            const fortnight = fortnights.find(f => f.id === currentFortnightId);
-
-            if (fortnight.status !== "Secured") {
-                fortnight.status = "Secured - Free";
-                fortnight.name = name;
-                if (email) {
-                    fortnight.email = email; // Capture email
-                    // Send email to /apisubscribe
-                    fetch('/apisubscribe', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: email })
-                    })
-                    .then(response => response.json())
-                    .then(data => console.log('Subscription email sent:', data))
-                    .catch(error => console.error('Error:', error));
-                }
-                closeModal("secure-free-modal");
-                renderFortnights();
-            }
-        });
-
-        // Pledge Modal: Submit pledge for the fortnight
         document.getElementById("pledge-form").addEventListener("submit", (e) => {
             e.preventDefault();
             const name = document.getElementById("pledge-name").value;
@@ -192,40 +145,24 @@
                 closeModal("pledge-modal");
                 renderFortnights();
 
-                // Send API request to /apiupdate-pledge
+                // Send pledge data to the backend API
                 fetch('/apiupdate-pledge', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fortnightId: currentFortnightId, name: name, pledge: pledge })
+                    body: JSON.stringify({
+                        fortnightId: currentFortnightId,
+                        name: name,
+                        pledge: pledge,
+                    })
                 })
                 .then(response => response.json())
-                .then(data => console.log('Pledge update email sent:', data))
-                .catch(error => console.error('Error:', error));
-
-                // Trigger opt-in modal 1.25 seconds after pledge success
-                setTimeout(() => {
-                    const optInModal = document.createElement('div');
-                    optInModal.id = "opt-in-modal";
-                    optInModal.className = "modal";
-                    optInModal.innerHTML = `
-                        <h2>Would you like to be notified if your pledge is usurped?</h2>
-                        <label for="opt-in-email">Email:</label>
-                        <input type="email" id="opt-in-email" placeholder="Enter your email" required><br><br>
-                        <button id="opt-in-yes">Yes, Notify Me</button>
-                        <button id="opt-in-no">No, Thank You</button>
-                    `;
-                    document.body.appendChild(optInModal);
-
-                    document.getElementById("opt-in-yes").addEventListener("click", () => {
-                        const email = document.getElementById("opt-in-email").value;
-                        alert('Will do!');
-                        optInModal.remove();
-                    });
-
-                    document.getElementById("opt-in-no").addEventListener("click", () => {
-                        optInModal.remove();
-                    });
-                }, 1250);
+                .then(data => {
+                    alert(data.message || 'Pledge updated successfully!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to update pledge!');
+                });
             } else {
                 document.getElementById("current-highest").innerText = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(fortnight.highestPledge);
                 document.getElementById("pledge-warning").classList.remove("hidden");
@@ -234,6 +171,5 @@
 
         document.addEventListener("DOMContentLoaded", renderFortnights);
     </script>
-
 </body>
 </html>
