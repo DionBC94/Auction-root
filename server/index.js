@@ -26,6 +26,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,  // From .env file
     pass: process.env.EMAIL_PASS,  // From .env file
   },
+  tls: {
+    rejectUnauthorized: false,  // Allow self-signed certificates (important for ProtonMail Bridge)
+  }
 });
 
 // Example API route for subscribing (handles POST requests)
